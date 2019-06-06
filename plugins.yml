@@ -1,8 +1,0 @@
-plugins:
-  - analysis-model-api
-  - build-failure-analyzer
-  - build-name-setter
-  - git
-  - github
-  - junit
-  - warnings-ng

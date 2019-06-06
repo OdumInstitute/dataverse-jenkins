@@ -1,6 +1,4 @@
 - name: Installing Jenkins
   hosts: localhost
-  pre_tasks:
-    - include_vars: plugins.yml
   roles:
-     - { role: geerlingguy.jenkins, jenkins_plugins: "" }
+     - { role: geerlingguy.jenkins, jenkins_plugins: "github" }
