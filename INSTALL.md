@@ -5,6 +5,10 @@ Installing Jenkins for Dataverse
 
 - AWS EC2 [t2.large][] or equivalent with 8 GB RAM and 2 CPUs
 
+## Sofware Requirements
+
+- CentOS 7
+
 ## Installing Jenkins
 
 As root:
