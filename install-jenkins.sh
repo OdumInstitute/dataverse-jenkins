@@ -1,5 +1,5 @@
 #!/bin/sh
-yum install -y ansible git maven zip vim-enhanced mlocate wget
+yum install -y ansible git maven zip unzip vim-enhanced mlocate wget
 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 yum install -y docker-ce docker-ce-cli containerd.io
 systemctl start docker
