@@ -45,6 +45,10 @@ set -e
 echo &quot;Installing Dataverse in Docker using docker-aio...&quot;
 conf/docker-aio/prep_it.bash
 
+echo &quot;Setting dataverse.siteUrl for DatasetsIT.testPrivateUrl...&quot;
+echo &quot;FIXME: Get conf/docker-aio/seturl.bash working from Jenkins.&quot;
+docker exec dv /usr/local/glassfish4/bin/asadmin create-jvm-options &quot;\&quot;-Ddataverse.siteUrl=http\://localhost\:8084\&quot;&quot;
+
 echo &quot;Running API test suite using docker-aio...&quot;
 conf/docker-aio/run-test-suite.sh</command>
     </hudson.tasks.Shell>
