@@ -137,10 +137,11 @@ ssh -T -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/nu
 sudo yum -y install epel-release
 #sudo yum -y install https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.9-1.el7.ans.noarch.rpm
 sudo yum -y install ansible git nano curl java-1.8.0-openjdk
-git clone -b $DJ_BRANCH $REPO_URL dataverse-jenkins
+git clone -b $DJ_BRANCH $REPO_URL jenkins
+cd jenkins
+mv ansible jenkins
 export ANSIBLE_ROLES_PATH=.
-pwd
-ansible-playbook -v dataverse-jenkins/ansible/dataverse-jenkins.pb --connection=local $GVARG
+ansible-playbook -v jenkins/dataverse-jenkins.pb --connection=local $GVARG
 EOF
 
 # Port 8080 has been added because Ansible puts a redirect in place
