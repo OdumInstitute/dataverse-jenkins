@@ -48,16 +48,8 @@ if [ ! -z "$GRPVRS" ]; then
 fi
 
 # test for CLI args
-if [ ! -z "$REPO_URL" ]; then
-   GVARG+=" -e dataverse_repo=$REPO_URL"
-   echo "using repo $REPO_URL"
-else
-   GVARG+=" -e dataverse_repo=$REPO_URL_DEFAULT"
-fi
-
-if [ ! -z "$DJ_BRANCH" ]; then
-   GVARG+=" -e dataverse_branch=$DJ_BRANCH"
-   echo "using branch $DJ_BRANCH"
+if [ -z "$REPO_URL" ]; then
+   $REPO_URL=$REPO_URL_DEFAULT
 fi
 
 if [ ! -z "$DJ_HOSTNAME" ]; then

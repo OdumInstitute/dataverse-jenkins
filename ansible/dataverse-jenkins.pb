@@ -1,4 +1,4 @@
-- hosts: jenkins
+- hosts: localhost
   roles:
-    - role: geerlingguy.jenkins
-      become: yes
+    - role: jenkins
+      become: true
