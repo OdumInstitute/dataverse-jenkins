@@ -9,7 +9,7 @@ PEM_DEFAULT=${HOME}
 SIZE='c4.large'
 
 usage() {
-  echo "Usage: $0 -h <hostname> -b <branch> -r <repo> -p <pem_dir> -g <group_vars> -a <dataverse-jenkins branch>" 1>&2
+  echo "Usage: $0 -h <hostname> -b <dataverse-jenkins branch> -r <repo> -p <pem_dir> -g <group_vars>" 1>&2
   echo "default branch is master"
   echo "default repo is https://github.com/IQSS/dataverse-jenkins"
   echo "default .pem location is ${HOME}"
@@ -22,14 +22,11 @@ while getopts ":h:a:r:b:g:p:" o; do
   h)
     DJ_HOSTNAME=${OPTARG}
     ;;
-  a)
-    DJ_BRANCH=${OPTARG}
-    ;;
   r)
     REPO_URL=${OPTARG}
     ;;
   b)
-    BRANCH=${OPTARG}
+    DJ_BRANCH=${OPTARG}
     ;;
   g)
     GRPVRS=${OPTARG}
@@ -54,21 +51,18 @@ fi
 if [ ! -z "$REPO_URL" ]; then
    GVARG+=" -e dataverse_repo=$REPO_URL"
    echo "using repo $REPO_URL"
+else
+   GVARG+=" -e dataverse_repo=$REPO_URL_DEFAULT"
 fi
 
-if [ ! -z "$BRANCH" ]; then
-   GVARG+=" -e dataverse_branch=$BRANCH"
-   echo "building branch $BRANCH"
+if [ ! -z "$DJ_BRANCH" ]; then
+   GVARG+=" -e dataverse_branch=$DJ_BRANCH"
+   echo "using branch $DJ_BRANCH"
 fi
 
 if [ ! -z "$DJ_HOSTNAME" ]; then
    GVARG+=" -e jenkins_hostname=$DJ_HOSTNAME"
    echo "using hostname $DJ_HOSTNAME"
-fi
-
-# default to dataverse-ansible/master
-if [ -z "$DA_BRANCH" ]; then
-   DA_BRANCH="master"
 fi
 
 # ansible doesn't care about pem_dir (yet)
@@ -82,8 +76,8 @@ if [[ "$?" -ne 0 ]]; then
   exit 1
 fi
 
-if [[ $(git ls-remote --heads $REPO_URL $BRANCH | wc -l) -eq 0 ]]; then
-  echo "Branch \"$BRANCH\" does not exist at $REPO_URL"
+if [[ $(git ls-remote --heads $REPO_URL $DJ_BRANCH | wc -l) -eq 0 ]]; then
+  echo "Branch \"$DJ_BRANCH\" does not exist at $REPO_URL"
   usage
   exit 1
 fi
@@ -137,21 +131,24 @@ USER_AT_HOST="centos@${PUBLIC_DNS}"
 echo "New instance created with ID \"$INSTANCE_ID\". To ssh into it:"
 echo "ssh -i $PEM_FILE $USER_AT_HOST"
 
-echo "Please wait at least 15 minutes while the branch \"$BRANCH\" from $REPO_URL is being deployed."
+echo "Please wait at least 15 minutes while the branch \"$DJ_BRANCH\" from $REPO_URL is being deployed."
 
 if [ ! -z "$GRPVRS" ]; then
    scp -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' -o 'ConnectTimeout=300' $GRPVRS $USER_AT_HOST:$GVFILE
 fi
 
+echo "git clone -b $DJ_BRANCH $REPO_URL dataverse-jenkins"
+
 # epel-release is installed first to ensure the latest ansible is installed after
 # TODO: Add some error checking for this ssh command.
 ssh -T -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' -o 'ConnectTimeout=300' $USER_AT_HOST <<EOF
 sudo yum -y install epel-release
-sudo yum -y install https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.9-1.el7.ans.noarch.rpm
-sudo yum -y install git nano curl java-1.8.0-openjdk
-git clone -b "$DJ_BRANCH $REPO_URL_DEFAULT" ansible
-export ANSIBLE_ROLES_PATH=ansible/.
-ansible-playbook -v ansible/dataverse-jenkins.pb --connection=local $GVARG
+#sudo yum -y install https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.9-1.el7.ans.noarch.rpm
+sudo yum -y install ansible git nano curl java-1.8.0-openjdk
+git clone -b $DJ_BRANCH $REPO_URL dataverse-jenkins
+export ANSIBLE_ROLES_PATH=.
+pwd
+ansible-playbook -v dataverse-jenkins/ansible/dataverse-jenkins.pb --connection=local $GVARG
 EOF
 
 # Port 8080 has been added because Ansible puts a redirect in place
@@ -160,6 +157,6 @@ EOF
 CLICKABLE_LINK="http://${PUBLIC_DNS}"
 echo "To ssh into the new instance:"
 echo "ssh -i $PEM_FILE $USER_AT_HOST"
-echo "Branch $BRANCH from $REPO_URL has been deployed to $CLICKABLE_LINK"
+echo "Branch $DJ_BRANCH from $REPO_URL has been deployed to $CLICKABLE_LINK"
 echo "When you are done, please terminate your instance with:"
 echo "aws ec2 terminate-instances --instance-ids $INSTANCE_ID"
