@@ -1,7 +1,7 @@
 ---
 
 - jenkins_job:
-    config: "{{ lookup('file', '~/dataverse/jenkins/config.xml') }}"
+    config: "{{ lookup('file', '~/jenkins/config.xml') }}"
     name: IQSS-Dataverse-Develop
     url: http://localhost:8080
     admin: '{{ jenkins_admin_username }}'
