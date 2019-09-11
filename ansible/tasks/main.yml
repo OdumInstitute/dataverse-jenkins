@@ -64,3 +64,6 @@
 
 # Update Jenkins and install configured plugins.
 - include_tasks: plugins.yml
+
+# import sample job
+- include_tasks: import.yml

@@ -61,7 +61,7 @@ if [ ! -z "$DJ_HOSTNAME" ]; then
    echo "using hostname $DJ_HOSTNAME"
 fi
 
-if [ ! -z "$SIZE" ]; then
+if [ -z "$SIZE" ]; then
    SIZE=$SIZE_DEFAULT
    echo "deploying to $SIZE"
 fi
