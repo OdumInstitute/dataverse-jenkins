@@ -43,7 +43,7 @@ done
 # test for ansible group_vars
 if [ ! -z "$GRPVRS" ]; then
    GVFILE=$(basename "$GRPVRS")
-   GVARG="-e @$GVFILE"
+   GVARG="-e @~/$GVFILE"
    echo "using $GRPVRS for extra vars"
 fi
 
@@ -126,6 +126,7 @@ echo "ssh -i $PEM_FILE $USER_AT_HOST"
 echo "Please wait at least 15 minutes while the branch \"$DJ_BRANCH\" from $REPO_URL is being deployed."
 
 if [ ! -z "$GRPVRS" ]; then
+   echo "copying group_vars file $GRPVRS"
    scp -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' -o 'ConnectTimeout=300' $GRPVRS $USER_AT_HOST:$GVFILE
 fi
 
@@ -147,7 +148,7 @@ EOF
 # Port 8080 has been added because Ansible puts a redirect in place
 # from HTTP to HTTPS and the cert is invalid (self-signed), forcing
 # the user to click through browser warnings.
-CLICKABLE_LINK="http://${PUBLIC_DNS}"
+CLICKABLE_LINK="http://${PUBLIC_DNS}:8080"
 echo "To ssh into the new instance:"
 echo "ssh -i $PEM_FILE $USER_AT_HOST"
 echo "Branch $DJ_BRANCH from $REPO_URL has been deployed to $CLICKABLE_LINK"
