@@ -6,18 +6,19 @@
 REPO_URL_DEFAULT='https://github.com/IQSS/dataverse-jenkins.git'
 BRANCH_DEFAULT='master'
 PEM_DEFAULT=${HOME}
-SIZE='c4.large'
+SIZE_DEFAULT='c4.large'
 
 usage() {
-  echo "Usage: $0 -h <hostname> -b <dataverse-jenkins branch> -r <repo> -p <pem_dir> -g <group_vars>" 1>&2
-  echo "default branch is master"
-  echo "default repo is https://github.com/IQSS/dataverse-jenkins"
-  echo "default .pem location is ${HOME}"
+  echo "Usage: $0 -h <hostname> -b <dataverse-jenkins branch> -r <repo> -p <pem_dir> -g <group_vars> -s <aws vm spec>" 1>&2
+  echo "default branch is $BRANCH_DEFAULT"
+  echo "default repo is $REPO_URL_DEFAULT"
+  echo "default .pem location is $PEM_DEFAULT"
   echo "example group_vars may be retrieved from https://raw.githubusercontent.com/IQSS/dataverse-jenkins/ansible/master/defaults/main.yml"
+  echo "default VM spec is $SIZE_DEFAULT"
   exit 1
 }
 
-while getopts ":h:a:r:b:g:p:" o; do
+while getopts ":h:a:r:b:g:p:s:" o; do
   case "${o}" in
   h)
     DJ_HOSTNAME=${OPTARG}
@@ -33,6 +34,9 @@ while getopts ":h:a:r:b:g:p:" o; do
     ;;
   p)
     PEM_DIR=${OPTARG}
+    ;;
+  s)
+    SIZE=${OPTARG}
     ;;
   *)
     usage
@@ -55,6 +59,11 @@ fi
 if [ ! -z "$DJ_HOSTNAME" ]; then
    GVARG+=" -e jenkins_hostname=$DJ_HOSTNAME"
    echo "using hostname $DJ_HOSTNAME"
+fi
+
+if [ ! -z "$SIZE" ]; then
+   SIZE=$SIZE_DEFAULT
+   echo "deploying to $SIZE"
 fi
 
 # ansible doesn't care about pem_dir (yet)
@@ -137,7 +146,7 @@ echo "git clone -b $DJ_BRANCH $REPO_URL dataverse-jenkins"
 ssh -T -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' -o 'ConnectTimeout=300' $USER_AT_HOST <<EOF
 sudo yum -y install epel-release
 #sudo yum -y install https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.9-1.el7.ans.noarch.rpm
-sudo yum -y install ansible git nano curl java-1.8.0-openjdk
+sudo yum -y install ansible git nano curl java-1.8.0-openjdk wget zip
 git clone -b $DJ_BRANCH $REPO_URL jenkins
 cd jenkins
 mv ansible jenkins
