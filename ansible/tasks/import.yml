@@ -4,5 +4,5 @@
     config: "{{ lookup('file', '~/jenkins/config.xml') }}"
     name: IQSS-Dataverse-Develop
     url: http://localhost:8080
-    admin: '{{ jenkins_admin_username }}'
+    user: '{{ jenkins_admin_username }}'
     password: '{{ jenkins_admin_password }}'
