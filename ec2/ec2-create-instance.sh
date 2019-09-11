@@ -146,7 +146,7 @@ echo "git clone -b $DJ_BRANCH $REPO_URL dataverse-jenkins"
 ssh -T -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' -o 'ConnectTimeout=300' $USER_AT_HOST <<EOF
 sudo yum -y install epel-release
 #sudo yum -y install https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.9-1.el7.ans.noarch.rpm
-sudo yum -y install ansible git nano curl java-1.8.0-openjdk wget zip
+sudo yum -y install ansible curl docker git maven nano java-1.8.0-openjdk wget zip
 git clone -b $DJ_BRANCH $REPO_URL jenkins
 cd jenkins
 mv ansible jenkins
