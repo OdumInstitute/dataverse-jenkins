@@ -147,6 +147,12 @@ ssh -T -i $PEM_FILE -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/nu
 sudo yum -y install epel-release
 #sudo yum -y install https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.7.9-1.el7.ans.noarch.rpm
 sudo yum -y install ansible curl docker git maven nano java-1.8.0-openjdk python-jenkins wget zip
+# allow jenkins to run docker without rebooting host
+groupadd docker
+gpasswd -a jenkins docker
+systemctl enable docker
+systemctl start docker
+# clone and execute
 git clone -b $DJ_BRANCH $REPO_URL jenkins
 cd jenkins
 mv ansible jenkins
