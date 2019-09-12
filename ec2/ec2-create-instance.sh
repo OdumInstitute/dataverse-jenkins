@@ -149,6 +149,7 @@ sudo yum -y install epel-release
 sudo yum -y install ansible curl docker git maven nano java-1.8.0-openjdk python-jenkins wget zip
 # allow jenkins to run docker without rebooting host
 groupadd docker
+useradd jenkins
 gpasswd -a jenkins docker
 systemctl enable docker
 systemctl start docker
