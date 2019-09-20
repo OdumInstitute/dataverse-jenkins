@@ -1,6 +1,14 @@
 Installing Jenkins for Dataverse
 ================================
 
+## Quickstart
+
+This should spin up a working Jenkins installation on AWS EC2:
+
+    ec2/ec2-create-instance.sh -r https://github.com/IQSS/dataverse-jenkins.git
+
+See below for other ways to install Jenkins.
+
 ## Hardware Requirements
 
 - AWS EC2 [t2.large][] or equivalent with 8 GB RAM and 2 CPUs
