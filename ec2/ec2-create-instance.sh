@@ -53,7 +53,7 @@ fi
 
 # test for CLI args
 if [ -z "$REPO_URL" ]; then
-   $REPO_URL=$REPO_URL_DEFAULT
+   REPO_URL=$REPO_URL_DEFAULT
 fi
 
 if [ ! -z "$DJ_HOSTNAME" ]; then

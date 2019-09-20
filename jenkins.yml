@@ -1,0 +1,4 @@
+- name: Installing Jenkins
+  hosts: localhost
+  roles:
+     - { role: geerlingguy.jenkins, jenkins_plugins: "github" }
