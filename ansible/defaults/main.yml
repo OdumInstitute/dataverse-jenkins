@@ -21,7 +21,6 @@ jenkins_plugins:
   - build-name-setter
   - github
   - git
-  - import
   - jira
   - junit
   - postbuildscript
