@@ -56,6 +56,11 @@ if [ -z "$REPO_URL" ]; then
    REPO_URL=$REPO_URL_DEFAULT
 fi
 
+if [ -z "$DJ_BRANCH" ]; then
+   DJ_BRANCH=$BRANCH_DEFAULT
+fi
+echo "using $DJ_BRANCH"
+
 if [ ! -z "$DJ_HOSTNAME" ]; then
    GVARG+=" -e jenkins_hostname=$DJ_HOSTNAME"
    echo "using hostname $DJ_HOSTNAME"
@@ -132,7 +137,7 @@ USER_AT_HOST="centos@${PUBLIC_DNS}"
 echo "New instance created with ID \"$INSTANCE_ID\". To ssh into it:"
 echo "ssh -i $PEM_FILE $USER_AT_HOST"
 
-echo "Please wait at least 15 minutes while the branch \"$DJ_BRANCH\" from $REPO_URL is being deployed."
+echo "Please wait at least 15 minutes while the branch $DJ_BRANCH from $REPO_URL is being deployed."
 
 if [ ! -z "$GRPVRS" ]; then
    echo "copying group_vars file $GRPVRS"
