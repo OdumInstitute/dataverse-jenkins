@@ -16,6 +16,8 @@ jenkins_jar_location: /opt/jenkins-cli.jar
 jenkins_url_prefix: ""
 jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
 
+jenkins_import_job: IQSS-Dataverse-Develop
+
 jenkins_plugins: 
   - build-failure-analyzer
   - build-name-setter
