@@ -3,7 +3,7 @@
 if [ ! -z $1 ]; then
    JOB=$1
 else
-   JOB="IQSS-dataverse-develop"
+   JOB="IQSS-Dataverse-Develop"
 fi
 
 SERVER=http://localhost:8080
