@@ -1,0 +1,16 @@
+---
+
+- name: stop Jenkins
+  systemd:
+    name: jenkins
+    state: stopped
+
+- name: update Jenkins
+  yum:
+    name: jenkins
+    state: latest
+
+- name: start Jenkins
+  systemd:
+    name: jenkins
+    state: started
