@@ -56,6 +56,11 @@ if [ -z "$REPO_URL" ]; then
    REPO_URL=$REPO_URL_DEFAULT
 fi
 
+if [ -z "$DJ_BRANCH" ]; then
+   DJ_BRANCH=$BRANCH_DEFAULT
+fi
+echo "using $DJ_BRANCH"
+
 if [ ! -z "$DJ_HOSTNAME" ]; then
    GVARG+=" -e jenkins_hostname=$DJ_HOSTNAME"
    echo "using hostname $DJ_HOSTNAME"

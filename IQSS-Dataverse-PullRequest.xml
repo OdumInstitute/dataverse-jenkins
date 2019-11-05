@@ -4,7 +4,8 @@
   <description>Automated builds and testing of Pull Requests made against https://github.com/IQSS/dataverse/tree/develop</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.22.0">
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.10"/>
+    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.23.0">
       <doNotScan>false</doNotScan>
     </com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
@@ -12,31 +13,81 @@
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.11.0">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.12.1">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <refspec>+refs/pull-requests/*/from:refs/remotes/*</refspec>
+        <name>origin</name>
+        <refspec>+refs/pull/${ghprbPullId}/*:refs/remotes/origin/pr/${ghprbPullId}/*</refspec>
         <url>https://github.com/IQSS/dataverse.git</url>
+        <credentialsId>d545b876-045e-45c8-9586-a32e9795d29b</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>**/pull-requests/**</name>
+        <name>${sha1}</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
     <submoduleCfg class="list"/>
-    <extensions/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.PreBuildMerge>
+        <options>
+          <mergeRemote>dataverse</mergeRemote>
+          <mergeTarget>develop</mergeTarget>
+          <mergeStrategy>default</mergeStrategy>
+          <fastForwardMode>FF</fastForwardMode>
+        </options>
+      </hudson.plugins.git.extensions.impl.PreBuildMerge>
+    </extensions>
   </scm>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
-      <spec></spec>
-    </com.cloudbees.jenkins.GitHubPushTrigger>
+    <org.jenkinsci.plugins.ghprb.GhprbTrigger plugin="ghprb@1.42.0">
+      <spec>H/5 * * * *</spec>
+      <configVersion>3</configVersion>
+      <adminlist>poikilotherm</adminlist>
+      <allowMembersOfWhitelistedOrgsAsAdmin>false</allowMembersOfWhitelistedOrgsAsAdmin>
+      <orgslist></orgslist>
+      <cron>H/5 * * * *</cron>
+      <buildDescTemplate></buildDescTemplate>
+      <onlyTriggerPhrase>true</onlyTriggerPhrase>
+      <useGitHubHooks>false</useGitHubHooks>
+      <permitAll>false</permitAll>
+      <whitelist></whitelist>
+      <autoCloseFailedPullRequests>false</autoCloseFailedPullRequests>
+      <displayBuildErrorsOnDownstreamBuilds>false</displayBuildErrorsOnDownstreamBuilds>
+      <whiteListTargetBranches>
+        <org.jenkinsci.plugins.ghprb.GhprbBranch>
+          <branch></branch>
+        </org.jenkinsci.plugins.ghprb.GhprbBranch>
+      </whiteListTargetBranches>
+      <blackListTargetBranches>
+        <org.jenkinsci.plugins.ghprb.GhprbBranch>
+          <branch></branch>
+        </org.jenkinsci.plugins.ghprb.GhprbBranch>
+      </blackListTargetBranches>
+      <gitHubAuthId>05aa1a1b-45f3-4b0a-8772-98fe6ce5f287</gitHubAuthId>
+      <triggerPhrase>.*(re)?run tests.*</triggerPhrase>
+      <skipBuildPhrase>.*\[skip\W+ci\].*</skipBuildPhrase>
+      <blackListCommitAuthor></blackListCommitAuthor>
+      <blackListLabels></blackListLabels>
+      <whiteListLabels></whiteListLabels>
+      <includedRegions></includedRegions>
+      <excludedRegions></excludedRegions>
+      <extensions>
+        <org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+          <commitStatusContext></commitStatusContext>
+          <triggeredStatus></triggeredStatus>
+          <startedStatus></startedStatus>
+          <statusUrl></statusUrl>
+          <addTestResults>false</addTestResults>
+        </org.jenkinsci.plugins.ghprb.extensions.status.GhprbSimpleStatus>
+      </extensions>
+    </org.jenkinsci.plugins.ghprb.GhprbTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
   <builders>
@@ -46,18 +97,47 @@
 echo &quot;exit on error&quot;
 set -e
 
+echo &quot;start with a clean plate&quot;
+rm -rf target/
+
 echo &quot;package warfile&quot;
-mvn -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests package</command>
+mvn -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests package
+
+echo &quot;generate HTML SureFire output&quot;
+mvn surefire-report:report</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <org.jenkinsci.plugins.postbuildscript.PostBuildScript plugin="postbuildscript@2.9.0">
+      <config>
+        <scriptFiles/>
+        <groovyScripts/>
+        <buildSteps>
+          <org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
+            <results>
+              <string>SUCCESS</string>
+            </results>
+            <role>BOTH</role>
+            <buildSteps>
+              <hudson.tasks.Shell>
+                <command>curl -O https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/ec2/ec2-create-instance.sh</command>
+              </hudson.tasks.Shell>
+              <hudson.tasks.Shell>
+                <command>bash ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g groupvars.yml</command>
+              </hudson.tasks.Shell>
+            </buildSteps>
+          </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
+        </buildSteps>
+        <markBuildUnstable>false</markBuildUnstable>
+      </config>
+    </org.jenkinsci.plugins.postbuildscript.PostBuildScript>
     <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.28">
       <testResults>target/surefire-reports/*.xml</testResults>
       <keepLongStdio>false</keepLongStdio>
       <healthScaleFactor>1.0</healthScaleFactor>
       <allowEmptyResults>false</allowEmptyResults>
     </hudson.tasks.junit.JUnitResultArchiver>
-    <io.jenkins.plugins.analysis.core.steps.IssuesRecorder plugin="warnings-ng@5.3.0">
+    <io.jenkins.plugins.analysis.core.steps.IssuesRecorder plugin="warnings-ng@6.1.0">
       <analysisTools>
         <io.jenkins.plugins.analysis.warnings.Java>
           <id></id>
@@ -77,21 +157,24 @@ mvn -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests package</command>
       <sourceCodeEncoding></sourceCodeEncoding>
       <ignoreQualityGate>false</ignoreQualityGate>
       <ignoreFailedBuilds>true</ignoreFailedBuilds>
-      <referenceJobName></referenceJobName>
+      <referenceJobName>-</referenceJobName>
+      <failOnError>false</failOnError>
       <healthy>0</healthy>
       <unhealthy>0</unhealthy>
-      <minimumSeverity plugin="analysis-model-api@5.2.0">
+      <minimumSeverity plugin="analysis-model-api@6.0.2">
         <name>LOW</name>
       </minimumSeverity>
       <filters/>
       <isEnabledForFailure>true</isEnabledForFailure>
       <isAggregatingResults>false</isAggregatingResults>
       <isBlameDisabled>false</isBlameDisabled>
+      <isForensicsDisabled>false</isForensicsDisabled>
       <qualityGates/>
+      <trendChartType>AGGREGATION_TOOLS</trendChartType>
     </io.jenkins.plugins.analysis.core.steps.IssuesRecorder>
   </publishers>
   <buildWrappers>
-    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.1">
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.3">
       <template>#${BUILD_NUMBER}: ${GIT_BRANCH}, SHA:${GIT_REVISION, length=8} (${BUILD_CAUSE})</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>

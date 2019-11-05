@@ -65,5 +65,9 @@
 # Update Jenkins and install configured plugins.
 - include_tasks: plugins.yml
 
+# now restart and update jenkins to work around https://github.com/geerlingguy/ansible-role-jenkins/issues/269
+- include_tasks: update_jenkins.yml
+  when: ansible_os_family == 'RedHat'
+
 # import sample job
 - include_tasks: import.yml

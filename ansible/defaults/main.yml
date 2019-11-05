@@ -1,7 +1,9 @@
 ---
 # Optional method of pinning a specific version of Jenkins and/or overriding the
 # default Jenkins packaging URL.
-# jenkins_version: "1.644"
+#
+# setting to 2.191 per https://github.com/geerlingguy/ansible-role-jenkins/issues/269
+jenkins_version: "2.191"
 # jenkins_pkg_url: "https://www.example.com"
 
 # Change this to `latest` to update Jenkins if a newer version is available.
@@ -16,12 +18,16 @@ jenkins_jar_location: /opt/jenkins-cli.jar
 jenkins_url_prefix: ""
 jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
 
+jenkins_import_job: IQSS-Dataverse-Develop
+
 jenkins_plugins: 
   - build-failure-analyzer
   - build-name-setter
   - github
   - git
+  - jira
   - junit
+  - postbuildscript
   - warnings-ng
 
 jenkins_plugins_state: present
