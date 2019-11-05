@@ -123,7 +123,7 @@ mvn surefire-report:report</command>
                 <command>curl -O https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/ec2/ec2-create-instance.sh</command>
               </hudson.tasks.Shell>
               <hudson.tasks.Shell>
-                <command>./ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g groupvars.yml</command>
+                <command>bash ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g groupvars.yml</command>
               </hudson.tasks.Shell>
             </buildSteps>
           </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>

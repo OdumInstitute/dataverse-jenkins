@@ -80,7 +80,7 @@ mvn surefire-report:report</command>
             <role>BOTH</role>
             <buildSteps>
               <hudson.tasks.Shell>
-                <command>./ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g groupvars.yml</command>
+                <command>bash ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g groupvars.yml</command>
               </hudson.tasks.Shell>
             </buildSteps>
           </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
