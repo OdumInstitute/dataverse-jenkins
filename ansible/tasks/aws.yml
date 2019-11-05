@@ -1,5 +1,15 @@
 ---
 
+- name: ensure epel-release
+  yum:
+    name: epel-release
+    state: latest
+
+- name: ensure aws-cli is present
+  yum:
+    name: awscli
+    state: latest
+
 - name: ensure .aws exists
   file:
     path: '{{ jenkins_home }}/.aws'
