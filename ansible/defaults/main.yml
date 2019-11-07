@@ -48,3 +48,9 @@ jenkins_init_changes:
     value: "--prefix={{ jenkins_url_prefix }}"
   - option: "{{ jenkins_java_options_env_var }}"
     value: "{{ jenkins_java_options }}"
+
+# AWS configuration
+aws:
+  access_key_id: 
+  secret_access_key: 
+  region: us-east-1

@@ -69,5 +69,8 @@
 - include_tasks: update_jenkins.yml
   when: ansible_os_family == 'RedHat'
 
+# place AWS config and credentials
+- include_tasks: aws.yml
+
 # import sample job
 - include_tasks: import.yml

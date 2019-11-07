@@ -137,7 +137,7 @@ USER_AT_HOST="centos@${PUBLIC_DNS}"
 echo "New instance created with ID \"$INSTANCE_ID\". To ssh into it:"
 echo "ssh -i $PEM_FILE $USER_AT_HOST"
 
-echo "Please wait at least 15 minutes while the branch \"$DJ_BRANCH\" from $REPO_URL is being deployed."
+echo "Please wait at least 15 minutes while the branch $DJ_BRANCH from $REPO_URL is being deployed."
 
 if [ ! -z "$GRPVRS" ]; then
    echo "copying group_vars file $GRPVRS"
