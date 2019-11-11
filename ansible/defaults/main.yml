@@ -21,14 +21,20 @@ jenkins_java_options: "-Djenkins.install.runSetupWizard=false"
 jenkins_import_job: IQSS-Dataverse-Develop
 
 jenkins_plugins: 
+  - branch-api
   - build-failure-analyzer
   - build-name-setter
-  - github
+  - cloudbees-folder
   - git
+  - github
+  - github-branch-source
   - jira
   - junit
+  - pipeline-model-definition
   - postbuildscript
   - warnings-ng
+  - workflow-cps-global-lib
+  - workflow-multibranch
 
 jenkins_plugins_state: present
 jenkins_plugin_updates_expiration: 86400
