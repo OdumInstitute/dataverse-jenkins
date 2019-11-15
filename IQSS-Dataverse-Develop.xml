@@ -1,14 +1,14 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
   <actions/>
-  <description>IQSS-dataverse-develop build for GDCC</description>
+  <description>IQSS-Dataverse-Develop build for GDCC</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.10"/>
-    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.23.0">
+    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.23.1">
       <doNotScan>false</doNotScan>
     </com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.4">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
       <projectUrl>https://github.com/IQSS/dataverse/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
@@ -34,7 +34,7 @@
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.4">
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.5">
       <spec></spec>
     </com.cloudbees.jenkins.GitHubPushTrigger>
   </triggers>
@@ -67,9 +67,12 @@ mvn surefire-report:report</command>
               <string>SUCCESS</string>
             </results>
             <role>BOTH</role>
+            <executeOn>BOTH</executeOn>
             <buildSteps>
               <hudson.tasks.Shell>
-                <command>curl -O https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/ec2/ec2-create-instance.sh</command>
+                <command>curl -O https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/ec2/ec2-create-instance.sh
+chmod 755 ec2-create-instance.sh
+curl -o groupvars.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/tests/group_vars/vagrant.yml</command>
               </hudson.tasks.Shell>
             </buildSteps>
           </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
@@ -78,6 +81,7 @@ mvn surefire-report:report</command>
               <string>SUCCESS</string>
             </results>
             <role>BOTH</role>
+            <executeOn>BOTH</executeOn>
             <buildSteps>
               <hudson.tasks.Shell>
                 <command>bash ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g groupvars.yml</command>
@@ -94,7 +98,7 @@ mvn surefire-report:report</command>
       <healthScaleFactor>1.0</healthScaleFactor>
       <allowEmptyResults>false</allowEmptyResults>
     </hudson.tasks.junit.JUnitResultArchiver>
-    <io.jenkins.plugins.analysis.core.steps.IssuesRecorder plugin="warnings-ng@6.1.0">
+    <io.jenkins.plugins.analysis.core.steps.IssuesRecorder plugin="warnings-ng@6.1.1">
       <analysisTools>
         <io.jenkins.plugins.analysis.warnings.Java>
           <id></id>
@@ -118,7 +122,7 @@ mvn surefire-report:report</command>
       <failOnError>false</failOnError>
       <healthy>0</healthy>
       <unhealthy>0</unhealthy>
-      <minimumSeverity plugin="analysis-model-api@6.0.2">
+      <minimumSeverity plugin="analysis-model-api@6.0.3">
         <name>LOW</name>
       </minimumSeverity>
       <filters/>
