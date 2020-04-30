@@ -135,7 +135,7 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
       <trendChartType>AGGREGATION_TOOLS</trendChartType>
     </io.jenkins.plugins.analysis.core.steps.IssuesRecorder>
     <hudson.plugins.jacoco.JacocoPublisher plugin="jacoco@3.0.5">
-      <execPattern>target/jacoco.exec</execPattern>
+      <execPattern>target/jacoco_merged.exec</execPattern>
       <classPattern>target/classes</classPattern>
       <sourcePattern>target/src/*/java</sourcePattern>
       <sourceInclusionPattern>**/*.java,**/*.groovy,**/*.kt,**/*.kts</sourceInclusionPattern>
