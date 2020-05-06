@@ -84,7 +84,7 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
             <executeOn>BOTH</executeOn>
             <buildSteps>
               <hudson.tasks.Shell>
-                <command>./ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g jenkins.yml -s t2.xlarge</command>
+                <command>./ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g jenkins.yml -s t2.large -d</command>
               </hudson.tasks.Shell>
             </buildSteps>
           </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
@@ -169,7 +169,7 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
       <adapters>
         <io.jenkins.plugins.coverage.adapter.JacocoReportAdapter>
           <path>target/site/jacoco/jacoco.xml</path>
-          <mergeToOneReport>false</mergeToOneReport>
+          <mergeToOneReport>true</mergeToOneReport>
           <thresholds class="linked-list"/>
         </io.jenkins.plugins.coverage.adapter.JacocoReportAdapter>
       </adapters>
