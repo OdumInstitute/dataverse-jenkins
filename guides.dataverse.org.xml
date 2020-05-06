@@ -1,0 +1,76 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.15"/>
+    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.25.1">
+      <doNotScan>false</doNotScan>
+    </com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.2.2">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/IQSS/dataverse.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/develop</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>VERSION=develop_test
+TARBALL=guides$VERSION.tar.gz
+#echo $VERSION
+#echo $TARBALL
+
+# need this for pdflatex
+# just sets typefaces, deal with it once it works.
+#. /etc/profile.d/HMDC_LaTeX.sh
+
+# restore this version after &quot;pdflatex: Command not found&quot; issue is resolved https://help.hmdc.harvard.edu/Ticket/Display.html?id=231943
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; scl enable python27 &quot;make html&quot;;  scl enable python27 &quot;make latexpdf&quot;; cp build/latex/Dataverse.pdf build/html; scl enable python27 &quot;make epub&quot;; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@docs.dataverse.org:/tmp)
+
+# 2016-03-08 PDF Y U NO BUILD?!?
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; scl enable python27 &quot;make html&quot;;  scl enable python27 &quot;make epub&quot;; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@guides.dataverse.org:/tmp)
+
+
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; scl enable python27 &quot;make html&quot;; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@docs.dataverse.org:/tmp)
+
+# New and improved command line to eliminate epub unknown mime-type warnings, see github #3391
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; scl enable python27 &quot;make html SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; scl enable python27 &quot;make latexpdf SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; cp build/latex/Dataverse.pdf build/html; scl enable python27 &quot;make epub SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@docs.dataverse.org:/tmp)
+
+# docs.dataverse.org is no longer in DNS :( -- pdurbin 2018-03-13
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; scl enable python27 &quot;make html SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; scl enable python27 &quot;make latexpdf SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; cp build/latex/Dataverse.pdf build/html; scl enable python27 &quot;make epub SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@docs.dataverse.org:/tmp)
+
+#ssh -l user docs.dataverse.org &quot;(mkdir -p /var/www/docs.dataverse.org/en/$VERSION &amp;&amp; cd /var/www/docs.dataverse.org/en/$VERSION &amp;&amp; tar xvzf /tmp/$TARBALL)&quot;
+
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; scl enable python27 &quot;make html SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; scl enable python27 &quot;make epub SPHINXBUILD=/nfs/tools/lib/python/2.7/current/bin/sphinx-build&quot;; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@guides.dataverse.org:/tmp)
+
+#original build command with PDF
+#(cd $WORKSPACE/doc/sphinx-guides; make clean; make html; make latexpdf; cp build/latex/Dataverse.pdf build/html; make epub; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@guides.dataverse.org:/tmp)
+
+# build without latexPDF which doesn&apos;t compile
+(cd $WORKSPACE/doc/sphinx-guides; make clean; make html; make epub; cp build/epub/Dataverse.epub build/html; cd build/html; tar cvzf /tmp/$TARBALL .; scp /tmp/$TARBALL user@guides.dataverse.org:/tmp)
+
+ssh -l user guides.dataverse.org &quot;(mkdir -p /var/www/docs.dataverse.org/en/$VERSION &amp;&amp; cd /var/www/docs.dataverse.org/en/$VERSION &amp;&amp; tar xvzf /tmp/$TARBALL)&quot;
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
