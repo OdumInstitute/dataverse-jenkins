@@ -4,16 +4,21 @@
   <description>IQSS-Dataverse-Develop build for GDCC</description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.15"/>
-    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.25.1">
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.1.1"/>
+    <com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty plugin="build-failure-analyzer@1.27.1">
       <doNotScan>false</doNotScan>
     </com.sonyericsson.jenkins.plugins.bfa.model.ScannerJobProperty>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.31.0">
       <projectUrl>https://github.com/IQSS/dataverse/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl plugin="branch-api@2.6.0">
+      <durationName>minute</durationName>
+      <count>1</count>
+      <userBoost>false</userBoost>
+    </jenkins.branch.RateLimitBranchProperty_-JobPropertyImpl>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.2.2">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.4.1">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
@@ -34,7 +39,7 @@
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.5">
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.31.0">
       <spec></spec>
     </com.cloudbees.jenkins.GitHubPushTrigger>
   </triggers>
@@ -54,10 +59,11 @@ mvn -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests package
 
 echo &quot;generate HTML SureFire output&quot;
 mvn surefire-report:report</command>
+      <configuredLocalRules/>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
-    <org.jenkinsci.plugins.postbuildscript.PostBuildScript plugin="postbuildscript@2.9.1">
+    <org.jenkinsci.plugins.postbuildscript.PostBuildScript plugin="postbuildscript@2.11.0">
       <config>
         <scriptFiles/>
         <groovyScripts/>
@@ -70,11 +76,13 @@ mvn surefire-report:report</command>
             <executeOn>BOTH</executeOn>
             <buildSteps>
               <hudson.tasks.Shell>
-                <command>curl -O https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/ec2/ec2-create-instance.sh
+                <command>curl -O https://raw.githubusercontent.com/GlobalDataverseCommunityConsortium/dataverse-ansible/master/ec2/ec2-create-instance.sh
 chmod 755 ec2-create-instance.sh
-curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/master/tests/group_vars/jenkins.yml</command>
+curl -o jenkins.yml https://raw.githubusercontent.com/GlobalDataverseCommunityConsortium/dataverse-ansible/master/tests/group_vars/jenkins.yml</command>
+                <configuredLocalRules/>
               </hudson.tasks.Shell>
             </buildSteps>
+            <stopOnFailure>false</stopOnFailure>
           </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
           <org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
             <results>
@@ -84,21 +92,30 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
             <executeOn>BOTH</executeOn>
             <buildSteps>
               <hudson.tasks.Shell>
-                <command>./ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g jenkins.yml -s t2.large -d</command>
+                <command>./ec2-create-instance.sh -b develop -r https://github.com/IQSS/dataverse.git -t jenkins_delete_me -l target -g jenkins.yml -s t3a.large -d
+
+if [ ! -f &quot;./ansible_complete&quot; ]; then
+    echo &quot;Ansible run terminated abnormally. Please check console output.&quot;
+    exit 1
+else
+    /bin/rm ./ansible_complete
+fi</command>
+                <configuredLocalRules/>
               </hudson.tasks.Shell>
             </buildSteps>
+            <stopOnFailure>false</stopOnFailure>
           </org.jenkinsci.plugins.postbuildscript.model.PostBuildStep>
         </buildSteps>
         <markBuildUnstable>false</markBuildUnstable>
       </config>
     </org.jenkinsci.plugins.postbuildscript.PostBuildScript>
-    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.28">
+    <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.34">
       <testResults>target/surefire-reports/*.xml</testResults>
       <keepLongStdio>false</keepLongStdio>
       <healthScaleFactor>1.0</healthScaleFactor>
       <allowEmptyResults>false</allowEmptyResults>
     </hudson.tasks.junit.JUnitResultArchiver>
-    <io.jenkins.plugins.analysis.core.steps.IssuesRecorder plugin="warnings-ng@8.1.0">
+    <io.jenkins.plugins.analysis.core.steps.IssuesRecorder plugin="warnings-ng@8.4.1">
       <analysisTools>
         <io.jenkins.plugins.analysis.warnings.Java>
           <id></id>
@@ -123,7 +140,7 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
       <failOnError>false</failOnError>
       <healthy>0</healthy>
       <unhealthy>0</unhealthy>
-      <minimumSeverity plugin="analysis-model-api@8.0.1">
+      <minimumSeverity plugin="analysis-model-api@8.3.1">
         <name>LOW</name>
       </minimumSeverity>
       <filters/>
@@ -131,10 +148,11 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
       <isAggregatingResults>false</isAggregatingResults>
       <isBlameDisabled>false</isBlameDisabled>
       <isForensicsDisabled>false</isForensicsDisabled>
+      <skipPublishingChecks>false</skipPublishingChecks>
       <qualityGates/>
       <trendChartType>AGGREGATION_TOOLS</trendChartType>
     </io.jenkins.plugins.analysis.core.steps.IssuesRecorder>
-    <hudson.plugins.jacoco.JacocoPublisher plugin="jacoco@3.0.5">
+    <hudson.plugins.jacoco.JacocoPublisher plugin="jacoco@3.0.7">
       <execPattern>target/jacoco_merged.exec</execPattern>
       <classPattern>target/classes</classPattern>
       <sourcePattern>target/src/*/java</sourcePattern>
@@ -165,7 +183,7 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
       <deltaClassCoverage>0</deltaClassCoverage>
       <buildOverBuild>false</buildOverBuild>
     </hudson.plugins.jacoco.JacocoPublisher>
-    <io.jenkins.plugins.coverage.CoveragePublisher plugin="code-coverage-api@1.1.5">
+    <io.jenkins.plugins.coverage.CoveragePublisher plugin="code-coverage-api@1.2.0">
       <adapters>
         <io.jenkins.plugins.coverage.adapter.JacocoReportAdapter>
           <path>target/site/jacoco/jacoco.xml</path>
@@ -183,10 +201,11 @@ curl -o jenkins.yml https://raw.githubusercontent.com/IQSS/dataverse-ansible/mas
       </sourceFileResolver>
       <calculateDiffForChangeRequests>false</calculateDiffForChangeRequests>
       <failBuildIfCoverageDecreasedInChangeRequest>false</failBuildIfCoverageDecreasedInChangeRequest>
+      <skipPublishingChecks>false</skipPublishingChecks>
     </io.jenkins.plugins.coverage.CoveragePublisher>
   </publishers>
   <buildWrappers>
-    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.4">
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.1.0">
       <template>#${BUILD_NUMBER}: ${GIT_BRANCH}, SHA:${GIT_REVISION, length=8} (${BUILD_CAUSE})</template>
       <descriptionTemplate></descriptionTemplate>
       <runAtStart>true</runAtStart>
