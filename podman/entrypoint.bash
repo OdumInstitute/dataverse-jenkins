@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 export LANG=en_US.UTF-8
+
+# start postgres
 sudo -u postgres /usr/pgsql-9.6/bin/pg_ctl start -D /var/lib/pgsql/data &
-#cd /opt/solr-7.7.2/
-# TODO: Run Solr as non-root and remove "-force".
-#bin/solr start -force
-#bin/solr create_core -c collection1 -d server/solr/collection1/conf -force
 
-# start apache, in both foreground and background...
-#apachectl -DFOREGROUND &
+# start solr
+# current incompatibility in centos7 with sudo and raised values in /etc/security/limits.conf
+# just run solr as root for now instead. sigh.
+#sudo -u solr /usr/local/solr/bin/solr start
+/usr/local/solr/bin/solr start -force
 
-# TODO: Run Glassfish as non-root.
-#cd /opt/glassfish4
-#bin/asadmin start-domain --debug
+# start payara
+sudo -u payara /usr/local/payara5/bin/asadmin start-domain
 sleep infinity
 
