@@ -27,28 +27,28 @@ RUN dnf install -y jq
 RUN sudo -u postgres /usr/pgsql-10/bin/initdb /var/lib/pgsql/data
 
 # install solr
-RUN curl -O ${SOLR_URL}
+RUN curl -s -O ${SOLR_URL}
 RUN mkdir /usr/local/solr && bsdtar --strip-components=1 -C /usr/local/solr -xf /solr-*
 RUN echo "solr soft nproc 65000" >> /etc/security/limits.conf && \
     echo "solr hard nproc 65000" >> /etc/security/limits.conf && \
     echo "solr soft nofile 65000" >> /etc/security/limits.conf && \
     echo "solr hard nofile 65000" >> /etc/security/limits.conf
-RUN mkdir -p /usr/local/solr/server/solr/collection1/conf && \
+RUN cp -r /usr/local/solr/server/solr/configsets/_default /usr/local/solr/server/solr/collection1 && \
     echo "name=collection1" > /usr/local/solr/server/solr/collection1/core.properties && \
     sed -i 's/solr.jetty.request.header.size"\ default="8192"/solr.jetty.request.header.size"\ default="102400"/' /usr/local/solr/server/etc/jetty.xml
 RUN useradd solr && chown -R solr:solr /usr/local/solr
 
 # install payara
-RUN curl -O ${PAYARA_URL}
+RUN curl -s -O ${PAYARA_URL}
 RUN mkdir /usr/local/payara5 && bsdtar --strip-components=1 -C /usr/local/payara5 -xf /payara-*
 RUN useradd payara && chown -R payara:payara /usr/local/payara5
 
 # download jacoco
-RUN curl -L -O ${JACOCO_ZIP} && unzip -q jacoco-*.zip -d /jacoco
+RUN curl -s -L -O ${JACOCO_ZIP} && unzip -q jacoco-*.zip -d /jacoco
 RUN cp /jacoco/lib/jacocoagent.jar /usr/local/payara5/glassfish/lib/
 
 # install maven
-RUN curl -L -O ${MAVEN_URL}
+RUN curl -s -L -O ${MAVEN_URL}
 RUN mkdir /opt/maven && bsdtar --strip-components=1 -C /opt/maven -xf /apache-maven-3.*
 RUN echo "export JAVA_HOME=/usr/lib/jvm/jre-openjdk" > /etc/profile.d/maven.sh && \
     echo "export M2_HOME=/opt/maven" >> /etc/profile.d/maven.sh && \
