@@ -12,7 +12,7 @@ usage() {
 }
 
 while getopts ":r:b" o; do
-  case "{o}" in
+  case "${o}" in
   r)
     PR_REPO=${OPTARG}
     ;;
@@ -30,7 +30,7 @@ git clone -b $IQSS_BRANCH $IQSS_REPO
 echo ""
 
 # if we have PR vars, merge with develop
-if [ ! -z $PR_BRANCH ];
+if [ ! -z $PR_REPO ] && [ ! -z $PR_BRANCH ];
    then cd /dataverse && git remote add pull $PR_REPO && git merge pull/$PR_BRANCH;
 fi
 
@@ -102,6 +102,9 @@ curl -H "X-Dataverse-key: $API_TOKEN" --header "Content-Type: application/json" 
   --data '{"assignee":":authenticated-users","role":"fullContributor"}' \
   http://localhost:8080/api/dataverses/root/assignments
 curl -H "X-Dataverse-key: $API_TOKEN" -X POST http://localhost:8080/api/dataverses/root/actions/:publish
+# integration tests require sequential identifiers
+curl -O https://raw.githubusercontent.com/IQSS/dataverse/develop/doc/sphinx-guides/source/_static/util/createsequence.sql
+sudo -u postgres psql -d dvndb -f createsequence.sql
 echo "running integration tests"
 cd /dataverse && source /etc/profile.d/maven.sh && \
    mvn test -Dtest=DataversesIT,DatasetsIT,SwordIT,AdminIT,BuiltinUsersIT,UsersIT,UtilIT,ConfirmEmailIT,FileMetadataIT,FilesIT,SearchIT,InReviewWorkflowIT,HarvestingServerIT,MoveIT,MakeDataCountApiIT,FileTypeDetectionIT,EditDDIIT,ExternalToolsIT,AccessIT,DuplicateFilesIT,DownloadFilesIT,LinkIT
@@ -109,7 +112,9 @@ echo ""
 
 echo "restarting payara to write out jacoco info..."
 sudo -u payara /usr/local/payara5/bin/asadmin stop-domain
-sudo -u payara /usr/local/payara5/bin/asadmin start-domain
+# don't need to start back up for jenkins
+# uncomment this if you want to poke at Dataverse post-run
+#sudo -u payara /usr/local/payara5/bin/asadmin start-domain
 
 echo "merging code coverage reports"
 /usr/bin/java -jar /jacoco/lib/jacococli.jar merge /usr/local/payara5/glassfish/domains/domain1/config/jacoco.exec /dataverse/target/jacoco.exec --destfile /dataverse/target/jacoco_merged.exec
@@ -118,6 +123,6 @@ echo "writing code coverage reports"
 /usr/bin/java -jar /jacoco/lib/jacococli.jar report --classfiles /dataverse/target/classes --sourcefiles /dataverse/src/main/java --html /dataverse/target/coverage-it /dataverse/target/jacoco_merged.exec
 echo ""
 
-echo "done, sleeping."
-#sudo -u payara /usr/local/payara5/bin/asadmin stop-domain
-sleep infinity
+echo "test suite finished, shutting down."
+# uncomment this to keep the container alive
+#sleep infinity

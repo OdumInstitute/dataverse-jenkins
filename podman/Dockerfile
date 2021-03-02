@@ -1,19 +1,11 @@
 FROM docker.io/library/centos:8
 
-# PR repo and branch arguments. May be passed as Docker --build-args
-ARG PR_REPO
-ARG PR_BRANCH
-
 # component arguments. maybe we'll make these override-able.
 ARG DEFAULT_CONFIG=https://raw.githubusercontent.com/IQSS/dataverse/develop/scripts/installer/default.config
 ARG JACOCO_ZIP=https://repo1.maven.org/maven2/org/jacoco/jacoco/0.8.6/jacoco-0.8.6.zip
 ARG MAVEN_URL=https://www-us.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 ARG PAYARA_URL=https://s3-eu-west-1.amazonaws.com/payara.fish/Payara+Downloads/5.2020.6/payara-5.2020.6.zip
 ARG SOLR_URL=https://archive.apache.org/dist/lucene/solr/7.7.2/solr-7.7.2.tgz
-
-# set PR repo and branch if passed
-RUN if [ ! -z ${PR_REPO} ]; then $PR_REPO_STR = "-r $PR_REPO"; fi
-RUN if [ ! -z ${PR_BRANCH} ]; then $PR_BRANCH_STR = "-b $PR_BRANCH"; fi
 
 # OS dependencies
 RUN dnf -y update
@@ -67,4 +59,13 @@ RUN echo "export JAVA_HOME=/usr/lib/jvm/jre-openjdk" > /etc/profile.d/maven.sh &
 # keeping the symlink on the off chance that something else is still assuming /usr/local/glassfish4
 RUN ln -s /usr/local/payara5 /usr/local/glassfish4
 COPY entrypoint.bash /
-CMD ["/entrypoint.bash", "$PR_REPO_STR", "$PR_BRANCH_STR"]
+
+# PR repo and branch arguments. May be passed as Docker --build-args
+ARG PR_REPO
+ARG PR_BRANCH
+
+# set PR repo and branch if passed
+RUN if [ ! -z ${PR_REPO} ]; then PR_REPO_STR="-r $PR_REPO"; fi
+RUN if [ ! -z ${PR_BRANCH} ]; then PR_BRANCH_STR="-b $PR_BRANCH"; fi
+
+CMD ["/entrypoint.bash", "${PR_REPO_STR}", "${PR_BRANCH_STR}"]
