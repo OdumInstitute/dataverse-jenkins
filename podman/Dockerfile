@@ -5,18 +5,18 @@ ARG DEFAULT_CONFIG=https://raw.githubusercontent.com/IQSS/dataverse/develop/scri
 ARG JACOCO_ZIP=https://repo1.maven.org/maven2/org/jacoco/jacoco/0.8.6/jacoco-0.8.6.zip
 ARG MAVEN_URL=https://www-us.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
 ARG PAYARA_URL=https://s3-eu-west-1.amazonaws.com/payara.fish/Payara+Downloads/5.2020.6/payara-5.2020.6.zip
-ARG SOLR_URL=https://archive.apache.org/dist/lucene/solr/7.7.2/solr-7.7.2.tgz
+ARG SOLR_URL=https://archive.apache.org/dist/lucene/solr/8.8.1/solr-8.8.1.tgz
 
 # OS dependencies
 RUN dnf -y update
-RUN dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+RUN dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 RUN dnf install -y epel-release bsdtar curl git java-11-openjdk-devel lsof make python36 python3-psycopg2 sudo unzip zip
-RUN dnf -qy module disable postgresql && dnf -qy install postgresql10-server
+RUN dnf -qy module disable postgresql && dnf -qy install postgresql13-server
 # jq is only available in EPEL, hence the second call
 RUN dnf install -y jq
 
 # initialize postgres
-RUN sudo -u postgres /usr/pgsql-10/bin/initdb /var/lib/pgsql/data
+RUN sudo -u postgres /usr/pgsql-13/bin/initdb /var/lib/pgsql/data
 
 # install solr
 RUN curl -s -O ${SOLR_URL}

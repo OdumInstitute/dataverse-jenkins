@@ -38,12 +38,7 @@ fi
 echo "executing mvn -Djacoco.skip.instrument=false -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests -T 2C package..."
 echo "find stdout and stderr in /dataverse/mvn.out"
 cd /dataverse && source /etc/profile.d/maven.sh && \
-   mvn -Djacoco.skip.instrument=false -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests -T 2C package > /dataverse/mvn.out 2>&1
-echo ""
-
-echo "generating surefire reports"
-cd /dataverse && source /etc/profile.d/maven.sh && \
-   mvn surefire-report:report > /dataverse/surefire.out 2>&1
+   sudo -u payara mvn -Djacoco.skip.instrument=false -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests -T 2C package > /dataverse/mvn.out 2>&1
 echo ""
 
 echo "jacoco instrumentation"
@@ -65,7 +60,7 @@ cp /jacoco-tmp/dataverse.war /dvinstall/dataverse.war
 echo ""
 
 echo "starting postgres"
-sudo -u postgres /usr/pgsql-10/bin/pg_ctl start -D /var/lib/pgsql/data &
+sudo -u postgres /usr/pgsql-13/bin/pg_ctl start -D /var/lib/pgsql/data &
 /bin/sleep 1
 echo ""
 
@@ -73,7 +68,7 @@ echo ""
 # current incompatibility in centos7 with sudo and raised values in /etc/security/limits.conf
 # just run solr as root for now instead. sigh.
 #sudo -u solr /usr/local/solr/bin/solr start
-cp /dataverse/conf/solr/7.7.2/*.xml /usr/local/solr/server/solr/collection1/conf/
+cp /dataverse/conf/solr/8.8.1/*.xml /usr/local/solr/server/solr/collection1/conf/
 echo "starting solr"
 /usr/local/solr/bin/solr start -force
 
@@ -108,6 +103,11 @@ sudo -u postgres psql -d dvndb -f createsequence.sql
 echo "running integration tests"
 cd /dataverse && source /etc/profile.d/maven.sh && \
    mvn test -Dtest=DataversesIT,DatasetsIT,SwordIT,AdminIT,BuiltinUsersIT,UsersIT,UtilIT,ConfirmEmailIT,FileMetadataIT,FilesIT,SearchIT,InReviewWorkflowIT,HarvestingServerIT,MoveIT,MakeDataCountApiIT,FileTypeDetectionIT,EditDDIIT,ExternalToolsIT,AccessIT,DuplicateFilesIT,DownloadFilesIT,LinkIT
+echo ""
+
+echo "generating surefire reports"
+cd /dataverse && source /etc/profile.d/maven.sh && \
+   mvn surefire-report:report > /dataverse/surefire.out 2>&1
 echo ""
 
 echo "restarting payara to write out jacoco info..."
