@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+DOCKERCMD="/usr/bin/podman"
+
 usage() {
   echo "Usage: $0 -r <PR_repo> -b <PR_branch>"
   echo "The default repo and branch are IQSS/dataverse and develop, respectively."
@@ -28,17 +30,21 @@ fi
 if [ ! -z "$PR_BRANCH" ]; then
    PR_BRANCH_STR="--build-arg PR_BRANCH=$PR_BRANCH"
    CONTAINER="$PR_BRANCH"
+   echo "container: $CONTAINER"
 else
-   CONTAINER="dataverse"
+   CONTAINER="dataverse-jenkins"
+   echo "container: $CONTAINER"
 fi
 
-/usr/bin/podman build -t dataverse . $PR_REPO_STR $PR_BRANCH_STR
+$DOCKERCMD build -t dataverse-jenkins . $PR_REPO_STR $PR_BRANCH_STR
 
-/usr/bin/podman run --name $CONTAINER dataverse:latest
+$DOCKERCMD run --name $CONTAINER dataverse-jenkins:latest
 
 /bin/mkdir -p ./target
-/usr/bin/podman cp $CONTAINER:/dataverse/target/classes ./target/
-/usr/bin/podman cp $CONTAINER:/dataverse/target/coverage-it ./target/
-/usr/bin/podman cp $CONTAINER:/dataverse/target/jacoco_merged.exec ./target/
-/usr/bin/podman cp $CONTAINER:/dataverse/target/site ./target/
-/usr/bin/podman cp $CONTAINER:/dataverse/target/surefire-reports ./target/
+$DOCKERCMD cp $CONTAINER:/dataverse/target/classes ./target/
+$DOCKERCMD cp $CONTAINER:/dataverse/target/coverage-it ./target/
+$DOCKERCMD cp $CONTAINER:/dataverse/target/jacoco_merged.exec ./target/
+$DOCKERCMD cp $CONTAINER:/dataverse/target/site ./target/
+$DOCKERCMD cp $CONTAINER:/dataverse/target/surefire-reports ./target/
+
+$DOCKERCMD rm $CONTAINER

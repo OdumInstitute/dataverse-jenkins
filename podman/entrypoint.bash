@@ -1,23 +1,25 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 export LANG=en_US.UTF-8
 
 IQSS_BRANCH=develop
 IQSS_REPO=https://github.com/IQSS/dataverse.git 
 
 usage() {
-  echo "Usage: $0 -b <PR_branch> -r <PR_repo>"
+  echo "Usage: $0 -r <PR_repo> -b <PR_branch>"
   echo "The default repo and branch are IQSS/dataverse and develop, respectively."
   echo "Command-line arguments will specify a branch/repo to be merged with the IQSS develop branch."
   exit 0
 }
 
-while getopts ":r:b" o; do
+while getopts ":r:b:" o; do
   case "${o}" in
   r)
     PR_REPO=${OPTARG}
+    echo "PR_REPO: ${PR_REPO}"
     ;;
   b)
     PR_BRANCH=${OPTARG}
+    echo "PR_BRANCH: ${PR_BRANCH}"
     ;;
   *)
     usage
@@ -26,19 +28,25 @@ while getopts ":r:b" o; do
 done
 
 # clone IQSS/dataverse:develop
+echo "cloning $IQSS_REPO:$IQSS_BRANCH"
 git clone -b $IQSS_BRANCH $IQSS_REPO
 echo ""
 
+echo "PR_REPO: $PR_REPO"
+echo "PR_BRANCH: $PR_BRANCH"
+
 # if we have PR vars, merge with develop
-if [ ! -z $PR_REPO ] && [ ! -z $PR_BRANCH ];
-   then cd /dataverse && git remote add pull $PR_REPO && git merge pull/$PR_BRANCH;
+if [ -n "$PR_REPO" ] || [ -n "$PR_BRANCH" ]; then
+   if [ "$PR_REPO" != "https://github.com/IQSS/dataverse.git" ] && [ "$PR_BRANCH" != "develop" ]; then
+      cd /dataverse && git remote add pull $PR_REPO && git fetch pull && git merge pull/$PR_BRANCH
+   fi
 fi
 
 # build warfile
 echo "executing mvn -Djacoco.skip.instrument=false -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests -T 2C package..."
 echo "find stdout and stderr in /dataverse/mvn.out"
 cd /dataverse && source /etc/profile.d/maven.sh && \
-   sudo -u payara mvn -Djacoco.skip.instrument=false -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests -T 2C package > /dataverse/mvn.out 2>&1
+   mvn -Djacoco.skip.instrument=false -DcompilerArgument=-Xlint:unchecked test -P all-unit-tests -T 2C package > /dataverse/mvn.out 2>&1
 echo ""
 
 echo "jacoco instrumentation"

@@ -7,6 +7,10 @@ ARG MAVEN_URL=https://www-us.apache.org/dist/maven/maven-3/3.6.3/binaries/apache
 ARG PAYARA_URL=https://s3-eu-west-1.amazonaws.com/payara.fish/Payara+Downloads/5.2020.6/payara-5.2020.6.zip
 ARG SOLR_URL=https://archive.apache.org/dist/lucene/solr/8.8.1/solr-8.8.1.tgz
 
+# PR repo and branch arguments. May be passed as Docker --build-args
+ARG PR_REPO
+ARG PR_BRANCH
+
 # OS dependencies
 RUN dnf -y update
 RUN dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -57,15 +61,16 @@ RUN echo "export JAVA_HOME=/usr/lib/jvm/jre-openjdk" > /etc/profile.d/maven.sh &
 #EXPOSE 5432
 
 # keeping the symlink on the off chance that something else is still assuming /usr/local/glassfish4
-RUN ln -s /usr/local/payara5 /usr/local/glassfish4
+# do we need this?
+#RUN ln -s /usr/local/payara5 /usr/local/glassfish4
+
 COPY entrypoint.bash /
 
-# PR repo and branch arguments. May be passed as Docker --build-args
-ARG PR_REPO
-ARG PR_BRANCH
+# set PR repo and branch if passed, otherwise populate with IQSS
+ENV PR_REPO_STR="${PR_REPO:-https://github.com/IQSS/dataverse.git}"
+ENV PR_BRANCH_STR="${PR_BRANCH:-develop}"
 
-# set PR repo and branch if passed
-RUN if [ ! -z ${PR_REPO} ]; then PR_REPO_STR="-r $PR_REPO"; fi
-RUN if [ ! -z ${PR_BRANCH} ]; then PR_BRANCH_STR="-b $PR_BRANCH"; fi
+RUN echo "PR_REPO_STR: ${PR_REPO_STR}"
+RUN echo "PR_BRANCH_STR: ${PR_BRANCH_STR}"
 
-CMD ["/entrypoint.bash", "${PR_REPO_STR}", "${PR_BRANCH_STR}"]
+ENTRYPOINT /entrypoint.bash -r $PR_REPO_STR -b $PR_BRANCH_STR
